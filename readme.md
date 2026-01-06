@@ -1,55 +1,61 @@
-# merge-descriptors
+# object-assign [![Build Status](https://travis-ci.org/sindresorhus/object-assign.svg?branch=master)](https://travis-ci.org/sindresorhus/object-assign)
 
-> Merge objects using their property descriptors
+> ES2015 [`Object.assign()`](http://www.2ality.com/2014/01/object-assign.html) [ponyfill](https://ponyfill.com)
+
+
+## Use the built-in
+
+Node.js 4 and up, as well as every evergreen browser (Chrome, Edge, Firefox, Opera, Safari),
+support `Object.assign()` :tada:. If you target only those environments, then by all
+means, use `Object.assign()` instead of this package.
+
 
 ## Install
 
-```sh
-npm install merge-descriptors
 ```
+$ npm install --save object-assign
+```
+
 
 ## Usage
 
 ```js
-import mergeDescriptors from 'merge-descriptors';
+const objectAssign = require('object-assign');
 
-const thing = {
-	get name() {
-		return 'John'
-	}
-}
+objectAssign({foo: 0}, {bar: 1});
+//=> {foo: 0, bar: 1}
 
-const animal = {};
+// multiple sources
+objectAssign({foo: 0}, {bar: 1}, {baz: 2});
+//=> {foo: 0, bar: 1, baz: 2}
 
-mergeDescriptors(animal, thing);
+// overwrites equal keys
+objectAssign({foo: 0}, {foo: 1}, {foo: 2});
+//=> {foo: 2}
 
-console.log(animal.name);
-//=> 'John'
+// ignores null and undefined sources
+objectAssign({foo: 0}, null, {bar: 1}, undefined);
+//=> {foo: 0, bar: 1}
 ```
+
 
 ## API
 
-### merge(destination, source, overwrite?)
+### objectAssign(target, [source, ...])
 
-Merges "own" properties from a source to a destination object, including non-enumerable and accessor-defined properties. It retains original values and descriptors, ensuring the destination receives a complete and accurate copy of the source's properties.
+Assigns enumerable own properties of `source` objects to the `target` object and returns the `target` object. Additional `source` objects will overwrite previous ones.
 
-Returns the modified destination object.
 
-#### destination
+## Resources
 
-Type: `object`
+- [ES2015 spec - Object.assign](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.assign)
 
-The object to receive properties.
 
-#### source
+## Related
 
-Type: `object`
+- [deep-assign](https://github.com/sindresorhus/deep-assign) - Recursive `Object.assign()`
 
-The object providing properties.
 
-#### overwrite
+## License
 
-Type: `boolean`\
-Default: `true`
-
-A boolean to control overwriting of existing properties.
+MIT © [Sindre Sorhus](https://sindresorhus.com)
