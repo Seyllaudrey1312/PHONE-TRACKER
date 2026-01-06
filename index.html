@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+
+<body>
+    <header>
+        <div class="logo">CONTROL<span>CENTER</span></div>
+        <div id="status">● SERVER ONLINE</div>
+    </header>
+
+    <main>
+        <div id="map-section">
+            <div id="map"></div>
+        </div>
+
+        <aside id="control-panel">
+            <div class="card">
+                <h3>Device Identity</h3>
+                <div class="info-row"><span>IMEI:</span> <b id="imei">Waiting...</b></div>
+                <div class="info-row"><span>Last Seen:</span> <span id="sync">N/A</span></div>
+            </div>
+
+            <div class="card">
+                <h3>Usage & Network</h3>
+                <div class="stats">
+                    <div class="stat-item">
+                        <label>Screen Time</label>
+                        <div id="scrTime">0h 0m</div>
+                    </div>
+                </div>
+                <h4>Detected Networks</h4>
+                <ul id="networkList">
+                    <li>No scan data yet</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>Remote Actions</h3>
+                <button class="btn-lock" onclick="triggerOverride()">FORCE DEVICE LOCK</button>
+            </div>
+        </aside>
+    </main>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const socket = io();
+        const map = L.map('map').setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        let marker = L.marker([0, 0]).addTo(map);
+
+        socket.on('device-update', (data) => {
+            document.getElementById('imei').innerText = data.imei;
+            document.getElementById('sync').innerText = data.timestamp;
+            document.getElementById('scrTime').innerText = data.screenTime + " mins";
+
+            // Update Map
+            const pos = [data.lat, data.lng];
+            marker.setLatLng(pos);
+            map.setView(pos, 15);
+
+            // Update Networks
+            const list = document.getElementById('networkList');
+            list.innerHTML = data.networks.map(n => `<li>${n}</li>`).join('');
+        });
+
+        function triggerOverride() {
+            const imei = document.getElementById('imei').innerText;
+            fetch(`/api/override/${imei}`, {
+                method: 'POST'
+            });
+            alert("Lock Command Sent to Device " + imei);
+        }
+    </script>
+</body>
+
+</html>
