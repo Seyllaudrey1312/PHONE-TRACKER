@@ -1,162 +1,114 @@
-/*!
- * range-parser
- * Copyright(c) 2012-2014 TJ Holowaychuk
- * Copyright(c) 2015-2016 Douglas Christopher Wilson
- * MIT Licensed
- */
+'use strict';
 
-'use strict'
+var test = require('tape');
 
-/**
- * Module exports.
- * @public
- */
+var getSideChannelMap = require('../');
 
-module.exports = rangeParser
+test('getSideChannelMap', { skip: typeof Map !== 'function' }, function (t) {
+	var getSideChannel = getSideChannelMap || function () {
+		throw new EvalError('should never happen');
+	};
 
-/**
- * Parse "Range" header `str` relative to the given file `size`.
- *
- * @param {Number} size
- * @param {String} str
- * @param {Object} [options]
- * @return {Array}
- * @public
- */
+	t.test('export', function (st) {
+		st.equal(typeof getSideChannel, 'function', 'is a function');
 
-function rangeParser (size, str, options) {
-  if (typeof str !== 'string') {
-    throw new TypeError('argument str must be a string')
-  }
+		st.equal(getSideChannel.length, 0, 'takes no arguments');
 
-  var index = str.indexOf('=')
+		var channel = getSideChannel();
+		st.ok(channel, 'is truthy');
+		st.equal(typeof channel, 'object', 'is an object');
+		st.end();
+	});
 
-  if (index === -1) {
-    return -2
-  }
+	t.test('assert', function (st) {
+		var channel = getSideChannel();
+		st['throws'](
+			function () { channel.assert({}); },
+			TypeError,
+			'nonexistent value throws'
+		);
 
-  // split the range string
-  var arr = str.slice(index + 1).split(',')
-  var ranges = []
+		var o = {};
+		channel.set(o, 'data');
+		st.doesNotThrow(function () { channel.assert(o); }, 'existent value noops');
 
-  // add ranges type
-  ranges.type = str.slice(0, index)
+		st.end();
+	});
 
-  // parse all ranges
-  for (var i = 0; i < arr.length; i++) {
-    var range = arr[i].split('-')
-    var start = parseInt(range[0], 10)
-    var end = parseInt(range[1], 10)
+	t.test('has', function (st) {
+		var channel = getSideChannel();
+		/** @type {unknown[]} */ var o = [];
 
-    // -nnn
-    if (isNaN(start)) {
-      start = size - end
-      end = size - 1
-    // nnn-
-    } else if (isNaN(end)) {
-      end = size - 1
-    }
+		st.equal(channel.has(o), false, 'nonexistent value yields false');
 
-    // limit last-byte-pos to current length
-    if (end > size - 1) {
-      end = size - 1
-    }
+		channel.set(o, 'foo');
+		st.equal(channel.has(o), true, 'existent value yields true');
 
-    // invalid or unsatisifiable
-    if (isNaN(start) || isNaN(end) || start > end || start < 0) {
-      continue
-    }
+		st.equal(channel.has('abc'), false, 'non object value non existent yields false');
 
-    // add range
-    ranges.push({
-      start: start,
-      end: end
-    })
-  }
+		channel.set('abc', 'foo');
+		st.equal(channel.has('abc'), true, 'non object value that exists yields true');
 
-  if (ranges.length < 1) {
-    // unsatisifiable
-    return -1
-  }
+		st.end();
+	});
 
-  return options && options.combine
-    ? combineRanges(ranges)
-    : ranges
-}
+	t.test('get', function (st) {
+		var channel = getSideChannel();
+		var o = {};
+		st.equal(channel.get(o), undefined, 'nonexistent value yields undefined');
 
-/**
- * Combine overlapping & adjacent ranges.
- * @private
- */
+		var data = {};
+		channel.set(o, data);
+		st.equal(channel.get(o), data, '"get" yields data set by "set"');
 
-function combineRanges (ranges) {
-  var ordered = ranges.map(mapWithIndex).sort(sortByRangeStart)
+		st.end();
+	});
 
-  for (var j = 0, i = 1; i < ordered.length; i++) {
-    var range = ordered[i]
-    var current = ordered[j]
+	t.test('set', function (st) {
+		var channel = getSideChannel();
+		var o = function () {};
+		st.equal(channel.get(o), undefined, 'value not set');
 
-    if (range.start > current.end + 1) {
-      // next range
-      ordered[++j] = range
-    } else if (range.end > current.end) {
-      // extend range
-      current.end = range.end
-      current.index = Math.min(current.index, range.index)
-    }
-  }
+		channel.set(o, 42);
+		st.equal(channel.get(o), 42, 'value was set');
 
-  // trim ordered array
-  ordered.length = j + 1
+		channel.set(o, Infinity);
+		st.equal(channel.get(o), Infinity, 'value was set again');
 
-  // generate combined range
-  var combined = ordered.sort(sortByRangeIndex).map(mapWithoutIndex)
+		var o2 = {};
+		channel.set(o2, 17);
+		st.equal(channel.get(o), Infinity, 'o is not modified');
+		st.equal(channel.get(o2), 17, 'o2 is set');
 
-  // copy ranges type
-  combined.type = ranges.type
+		channel.set(o, 14);
+		st.equal(channel.get(o), 14, 'o is modified');
+		st.equal(channel.get(o2), 17, 'o2 is not modified');
 
-  return combined
-}
+		st.end();
+	});
 
-/**
- * Map function to add index value to ranges.
- * @private
- */
+	t.test('delete', function (st) {
+		var channel = getSideChannel();
+		var o = {};
+		st.equal(channel['delete']({}), false, 'nonexistent value yields false');
 
-function mapWithIndex (range, index) {
-  return {
-    start: range.start,
-    end: range.end,
-    index: index
-  }
-}
+		channel.set(o, 42);
+		st.equal(channel.has(o), true, 'value is set');
 
-/**
- * Map function to remove index value from ranges.
- * @private
- */
+		st.equal(channel['delete']({}), false, 'nonexistent value still yields false');
 
-function mapWithoutIndex (range) {
-  return {
-    start: range.start,
-    end: range.end
-  }
-}
+		st.equal(channel['delete'](o), true, 'deleted value yields true');
 
-/**
- * Sort function to sort ranges by index.
- * @private
- */
+		st.equal(channel.has(o), false, 'value is no longer set');
 
-function sortByRangeIndex (a, b) {
-  return a.index - b.index
-}
+		st.end();
+	});
 
-/**
- * Sort function to sort ranges by start position.
- * @private
- */
+	t.end();
+});
 
-function sortByRangeStart (a, b) {
-  return a.start - b.start
-}
+test('getSideChannelMap, no Maps', { skip: typeof Map === 'function' }, function (t) {
+	t.equal(getSideChannelMap, false, 'is false');
+
+	t.end();
+});

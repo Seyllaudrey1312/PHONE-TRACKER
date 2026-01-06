@@ -1,84 +1,62 @@
-# range-parser
+# side-channel-map <sup>[![Version Badge][npm-version-svg]][package-url]</sup>
 
-[![NPM Version][npm-version-image]][npm-url]
-[![NPM Downloads][npm-downloads-image]][npm-url]
-[![Node.js Version][node-image]][node-url]
-[![Build Status][travis-image]][travis-url]
-[![Test Coverage][coveralls-image]][coveralls-url]
+[![github actions][actions-image]][actions-url]
+[![coverage][codecov-image]][codecov-url]
+[![License][license-image]][license-url]
+[![Downloads][downloads-image]][downloads-url]
 
-Range header field parser.
+[![npm badge][npm-badge-png]][package-url]
 
-## Installation
+Store information about any JS value in a side channel, using a Map.
 
-This is a [Node.js](https://nodejs.org/en/) module available through the
-[npm registry](https://www.npmjs.com/). Installation is done using the
-[`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
+Warning: if the `key` is an object, this implementation will leak memory until you `delete` it.
+Use [`side-channel`](https://npmjs.com/side-channel) for the best available strategy.
+
+## Getting started
 
 ```sh
-$ npm install range-parser
+npm install --save side-channel-map
 ```
 
-## API
-
-<!-- eslint-disable no-unused-vars -->
+## Usage/Examples
 
 ```js
-var parseRange = require('range-parser')
+const assert = require('assert');
+const getSideChannelMap = require('side-channel-map');
+
+const channel = getSideChannelMap();
+
+const key = {};
+assert.equal(channel.has(key), false);
+assert.throws(() => channel.assert(key), TypeError);
+
+channel.set(key, 42);
+
+channel.assert(key); // does not throw
+assert.equal(channel.has(key), true);
+assert.equal(channel.get(key), 42);
+
+channel.delete(key);
+assert.equal(channel.has(key), false);
+assert.throws(() => channel.assert(key), TypeError);
 ```
 
-### parseRange(size, header, options)
+## Tests
 
-Parse the given `header` string where `size` is the maximum size of the resource.
-An array of ranges will be returned or negative numbers indicating an error parsing.
+Clone the repo, `npm install`, and run `npm test`
 
-  * `-2` signals a malformed header string
-  * `-1` signals an unsatisfiable range
-
-<!-- eslint-disable no-undef -->
-
-```js
-// parse header from request
-var range = parseRange(size, req.headers.range)
-
-// the type of the range
-if (range.type === 'bytes') {
-  // the ranges
-  range.forEach(function (r) {
-    // do something with r.start and r.end
-  })
-}
-```
-
-#### Options
-
-These properties are accepted in the options object.
-
-##### combine
-
-Specifies if overlapping & adjacent ranges should be combined, defaults to `false`.
-When `true`, ranges will be combined and returned as if they were specified that
-way in the header.
-
-<!-- eslint-disable no-undef -->
-
-```js
-parseRange(100, 'bytes=50-55,0-10,5-10,56-60', { combine: true })
-// => [
-//      { start: 0,  end: 10 },
-//      { start: 50, end: 60 }
-//    ]
-```
-
-## License
-
-[MIT](LICENSE)
-
-[coveralls-image]: https://badgen.net/coveralls/c/github/jshttp/range-parser/master
-[coveralls-url]: https://coveralls.io/r/jshttp/range-parser?branch=master
-[node-image]: https://badgen.net/npm/node/range-parser
-[node-url]: https://nodejs.org/en/download
-[npm-downloads-image]: https://badgen.net/npm/dm/range-parser
-[npm-url]: https://npmjs.org/package/range-parser
-[npm-version-image]: https://badgen.net/npm/v/range-parser
-[travis-image]: https://badgen.net/travis/jshttp/range-parser/master
-[travis-url]: https://travis-ci.org/jshttp/range-parser
+[package-url]: https://npmjs.org/package/side-channel-map
+[npm-version-svg]: https://versionbadg.es/ljharb/side-channel-map.svg
+[deps-svg]: https://david-dm.org/ljharb/side-channel-map.svg
+[deps-url]: https://david-dm.org/ljharb/side-channel-map
+[dev-deps-svg]: https://david-dm.org/ljharb/side-channel-map/dev-status.svg
+[dev-deps-url]: https://david-dm.org/ljharb/side-channel-map#info=devDependencies
+[npm-badge-png]: https://nodei.co/npm/side-channel-map.png?downloads=true&stars=true
+[license-image]: https://img.shields.io/npm/l/side-channel-map.svg
+[license-url]: LICENSE
+[downloads-image]: https://img.shields.io/npm/dm/side-channel-map.svg
+[downloads-url]: https://npm-stat.com/charts.html?package=side-channel-map
+[codecov-image]: https://codecov.io/gh/ljharb/side-channel-map/branch/main/graphs/badge.svg
+[codecov-url]: https://app.codecov.io/gh/ljharb/side-channel-map/
+[actions-image]: https://img.shields.io/endpoint?url=https://github-actions-badge-u3jn4tfpocch.runkit.sh/ljharb/side-channel-map
+[actions-url]: https://github.com/ljharb/side-channel-map/actions
