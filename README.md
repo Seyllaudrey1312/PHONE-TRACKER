@@ -1,140 +1,63 @@
-# accepts
+# es-object-atoms <sup>[![Version Badge][npm-version-svg]][package-url]</sup>
 
-[![NPM Version][npm-version-image]][npm-url]
-[![NPM Downloads][npm-downloads-image]][npm-url]
-[![Node.js Version][node-version-image]][node-version-url]
-[![Build Status][github-actions-ci-image]][github-actions-ci-url]
-[![Test Coverage][coveralls-image]][coveralls-url]
+[![github actions][actions-image]][actions-url]
+[![coverage][codecov-image]][codecov-url]
+[![License][license-image]][license-url]
+[![Downloads][downloads-image]][downloads-url]
 
-Higher level content negotiation based on [negotiator](https://www.npmjs.com/package/negotiator).
-Extracted from [koa](https://www.npmjs.com/package/koa) for general use.
+[![npm badge][npm-badge-png]][package-url]
 
-In addition to negotiator, it allows:
+ES Object-related atoms: Object, ToObject, RequireObjectCoercible.
 
-- Allows types as an array or arguments list, ie `(['text/html', 'application/json'])`
-  as well as `('text/html', 'application/json')`.
-- Allows type shorthands such as `json`.
-- Returns `false` when no types match
-- Treats non-existent headers as `*`
-
-## Installation
-
-This is a [Node.js](https://nodejs.org/en/) module available through the
-[npm registry](https://www.npmjs.com/). Installation is done using the
-[`npm install` command](https://docs.npmjs.com/getting-started/installing-npm-packages-locally):
-
-```sh
-$ npm install accepts
-```
-
-## API
+## Example
 
 ```js
-var accepts = require('accepts')
+const assert = require('assert');
+
+const $Object = require('es-object-atoms');
+const isObject = require('es-object-atoms/isObject');
+const ToObject = require('es-object-atoms/ToObject');
+const RequireObjectCoercible = require('es-object-atoms/RequireObjectCoercible');
+
+assert.equal($Object, Object);
+assert.throws(() => ToObject(null), TypeError);
+assert.throws(() => ToObject(undefined), TypeError);
+assert.throws(() => RequireObjectCoercible(null), TypeError);
+assert.throws(() => RequireObjectCoercible(undefined), TypeError);
+
+assert.equal(isObject(undefined), false);
+assert.equal(isObject(null), false);
+assert.equal(isObject({}), true);
+assert.equal(isObject([]), true);
+assert.equal(isObject(function () {}), true);
+
+assert.deepEqual(RequireObjectCoercible(true), true);
+assert.deepEqual(ToObject(true), Object(true));
+
+const obj = {};
+assert.equal(RequireObjectCoercible(obj), obj);
+assert.equal(ToObject(obj), obj);
 ```
 
-### accepts(req)
+## Tests
+Simply clone the repo, `npm install`, and run `npm test`
 
-Create a new `Accepts` object for the given `req`.
+## Security
 
-#### .charset(charsets)
+Please email [@ljharb](https://github.com/ljharb) or see https://tidelift.com/security if you have a potential security vulnerability to report.
 
-Return the first accepted charset. If nothing in `charsets` is accepted,
-then `false` is returned.
-
-#### .charsets()
-
-Return the charsets that the request accepts, in the order of the client's
-preference (most preferred first).
-
-#### .encoding(encodings)
-
-Return the first accepted encoding. If nothing in `encodings` is accepted,
-then `false` is returned.
-
-#### .encodings()
-
-Return the encodings that the request accepts, in the order of the client's
-preference (most preferred first).
-
-#### .language(languages)
-
-Return the first accepted language. If nothing in `languages` is accepted,
-then `false` is returned.
-
-#### .languages()
-
-Return the languages that the request accepts, in the order of the client's
-preference (most preferred first).
-
-#### .type(types)
-
-Return the first accepted type (and it is returned as the same text as what
-appears in the `types` array). If nothing in `types` is accepted, then `false`
-is returned.
-
-The `types` array can contain full MIME types or file extensions. Any value
-that is not a full MIME types is passed to `require('mime-types').lookup`.
-
-#### .types()
-
-Return the types that the request accepts, in the order of the client's
-preference (most preferred first).
-
-## Examples
-
-### Simple type negotiation
-
-This simple example shows how to use `accepts` to return a different typed
-respond body based on what the client wants to accept. The server lists it's
-preferences in order and will get back the best match between the client and
-server.
-
-```js
-var accepts = require('accepts')
-var http = require('http')
-
-function app (req, res) {
-  var accept = accepts(req)
-
-  // the order of this list is significant; should be server preferred order
-  switch (accept.type(['json', 'html'])) {
-    case 'json':
-      res.setHeader('Content-Type', 'application/json')
-      res.write('{"hello":"world!"}')
-      break
-    case 'html':
-      res.setHeader('Content-Type', 'text/html')
-      res.write('<b>hello, world!</b>')
-      break
-    default:
-      // the fallback is text/plain, so no need to specify it above
-      res.setHeader('Content-Type', 'text/plain')
-      res.write('hello, world!')
-      break
-  }
-
-  res.end()
-}
-
-http.createServer(app).listen(3000)
-```
-
-You can test this out with the cURL program:
-```sh
-curl -I -H'Accept: text/html' http://localhost:3000/
-```
-
-## License
-
-[MIT](LICENSE)
-
-[coveralls-image]: https://badgen.net/coveralls/c/github/jshttp/accepts/master
-[coveralls-url]: https://coveralls.io/r/jshttp/accepts?branch=master
-[github-actions-ci-image]: https://badgen.net/github/checks/jshttp/accepts/master?label=ci
-[github-actions-ci-url]: https://github.com/jshttp/accepts/actions/workflows/ci.yml
-[node-version-image]: https://badgen.net/npm/node/accepts
-[node-version-url]: https://nodejs.org/en/download
-[npm-downloads-image]: https://badgen.net/npm/dm/accepts
-[npm-url]: https://npmjs.org/package/accepts
-[npm-version-image]: https://badgen.net/npm/v/accepts
+[package-url]: https://npmjs.org/package/es-object-atoms
+[npm-version-svg]: https://versionbadg.es/ljharb/es-object-atoms.svg
+[deps-svg]: https://david-dm.org/ljharb/es-object-atoms.svg
+[deps-url]: https://david-dm.org/ljharb/es-object-atoms
+[dev-deps-svg]: https://david-dm.org/ljharb/es-object-atoms/dev-status.svg
+[dev-deps-url]: https://david-dm.org/ljharb/es-object-atoms#info=devDependencies
+[npm-badge-png]: https://nodei.co/npm/es-object-atoms.png?downloads=true&stars=true
+[license-image]: https://img.shields.io/npm/l/es-object-atoms.svg
+[license-url]: LICENSE
+[downloads-image]: https://img.shields.io/npm/dm/es-object.svg
+[downloads-url]: https://npm-stat.com/charts.html?package=es-object-atoms
+[codecov-image]: https://codecov.io/gh/ljharb/es-object-atoms/branch/main/graphs/badge.svg
+[codecov-url]: https://app.codecov.io/gh/ljharb/es-object-atoms/
+[actions-image]: https://img.shields.io/endpoint?url=https://github-actions-badge-u3jn4tfpocch.runkit.sh/ljharb/es-object-atoms
+[actions-url]: https://github.com/ljharb/es-object-atoms/actions
