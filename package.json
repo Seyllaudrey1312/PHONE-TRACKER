@@ -1,35 +1,50 @@
 {
-  "name": "ipaddr.js",
-  "description": "A library for manipulating IPv4 and IPv6 addresses in JavaScript.",
-  "version": "1.9.1",
-  "author": "whitequark <whitequark@whitequark.org>",
-  "directories": {
-    "lib": "./lib"
-  },
-  "dependencies": {},
-  "devDependencies": {
-    "coffee-script": "~1.12.6",
-    "nodeunit": "^0.11.3",
-    "uglify-js": "~3.0.19"
-  },
-  "scripts": {
-    "test": "cake build test"
-  },
-  "files": [
-    "lib/",
-    "LICENSE",
-    "ipaddr.min.js"
-  ],
-  "keywords": [
-    "ip",
-    "ipv4",
-    "ipv6"
-  ],
-  "repository": "git://github.com/whitequark/ipaddr.js",
-  "main": "./lib/ipaddr.js",
-  "engines": {
-    "node": ">= 0.10"
-  },
-  "license": "MIT",
-  "types": "./lib/ipaddr.js.d.ts"
+	"name": "merge-descriptors",
+	"version": "2.0.0",
+	"description": "Merge objects using their property descriptors",
+	"license": "MIT",
+	"repository": "sindresorhus/merge-descriptors",
+	"funding": "https://github.com/sponsors/sindresorhus",
+	"contributors": [
+		"Jonathan Ong <me@jongleberry.com>",
+		"Douglas Christopher Wilson <doug@somethingdoug.com>",
+		"Mike Grabowski <grabbou@gmail.com>",
+		"Sindre Sorhus <sindresorhus@gmail.com>"
+	],
+	"exports": {
+		"types": "./index.d.ts",
+		"default": "./index.js"
+	},
+	"main": "./index.js",
+	"types": "./index.d.ts",
+	"sideEffects": false,
+	"engines": {
+		"node": ">=18"
+	},
+	"scripts": {
+		"test": "xo && ava"
+	},
+	"files": [
+		"index.js",
+		"index.d.ts"
+	],
+	"keywords": [
+		"merge",
+		"descriptors",
+		"object",
+		"property",
+		"properties",
+		"merging",
+		"getter",
+		"setter"
+	],
+	"devDependencies": {
+		"ava": "^5.3.1",
+		"xo": "^0.56.0"
+	},
+	"xo": {
+		"rules": {
+			"unicorn/prefer-module": "off"
+		}
+	}
 }

@@ -1,23 +1,26 @@
-"use strict"
+'use strict';
 
-var mergeModules = require("../lib/helpers/merge-exports")
+function mergeDescriptors(destination, source, overwrite = true) {
+	if (!destination) {
+		throw new TypeError('The `destination` argument is required.');
+	}
 
-// Update this array if you add/rename/remove files in this directory.
-// We support Browserify by skipping automatic module discovery and requiring modules directly.
-var modules = [
-  require("./internal"),
-  require("./utf32"),
-  require("./utf16"),
-  require("./utf7"),
-  require("./sbcs-codec"),
-  require("./sbcs-data"),
-  require("./sbcs-data-generated"),
-  require("./dbcs-codec"),
-  require("./dbcs-data")
-]
+	if (!source) {
+		throw new TypeError('The `source` argument is required.');
+	}
 
-// Put all encoding/alias/codec definitions to single object and export it.
-for (var i = 0; i < modules.length; i++) {
-  var module = modules[i]
-  mergeModules(exports, module)
+	for (const name of Object.getOwnPropertyNames(source)) {
+		if (!overwrite && Object.hasOwn(destination, name)) {
+			// Skip descriptor
+			continue;
+		}
+
+		// Copy descriptor
+		const descriptor = Object.getOwnPropertyDescriptor(source, name);
+		Object.defineProperty(destination, name, descriptor);
+	}
+
+	return destination;
 }
+
+module.exports = mergeDescriptors;
