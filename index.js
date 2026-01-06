@@ -2,10 +2,10 @@
 
 var test = require('tape');
 
-var getSideChannelMap = require('../');
+var getSideChannelWeakMap = require('../');
 
-test('getSideChannelMap', { skip: typeof Map !== 'function' }, function (t) {
-	var getSideChannel = getSideChannelMap || function () {
+test('getSideChannelMap', { skip: typeof WeakMap !== 'function' && typeof Map !== 'function' }, function (t) {
+	var getSideChannel = getSideChannelWeakMap || function () {
 		throw new EvalError('should never happen');
 	};
 
@@ -107,8 +107,8 @@ test('getSideChannelMap', { skip: typeof Map !== 'function' }, function (t) {
 	t.end();
 });
 
-test('getSideChannelMap, no Maps', { skip: typeof Map === 'function' }, function (t) {
-	t.equal(getSideChannelMap, false, 'is false');
+test('getSideChannelMap, no WeakMaps and/or Maps', { skip: typeof WeakMap === 'function' || typeof Map === 'function' }, function (t) {
+	t.equal(getSideChannelWeakMap, false, 'is false');
 
 	t.end();
 });
