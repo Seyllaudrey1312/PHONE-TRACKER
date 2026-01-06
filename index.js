@@ -1,7 +1,7 @@
 /*!
- * on-finished
- * Copyright(c) 2013 Jonathan Ong
- * Copyright(c) 2014 Douglas Christopher Wilson
+ * range-parser
+ * Copyright(c) 2012-2014 TJ Holowaychuk
+ * Copyright(c) 2015-2016 Douglas Christopher Wilson
  * MIT Licensed
  */
 
@@ -12,223 +12,151 @@
  * @public
  */
 
-module.exports = onFinished
-module.exports.isFinished = isFinished
+module.exports = rangeParser
 
 /**
- * Module dependencies.
- * @private
- */
-
-var asyncHooks = tryRequireAsyncHooks()
-var first = require('ee-first')
-
-/**
- * Variables.
- * @private
- */
-
-/* istanbul ignore next */
-var defer = typeof setImmediate === 'function'
-  ? setImmediate
-  : function (fn) { process.nextTick(fn.bind.apply(fn, arguments)) }
-
-/**
- * Invoke callback when the response has finished, useful for
- * cleaning up resources afterwards.
+ * Parse "Range" header `str` relative to the given file `size`.
  *
- * @param {object} msg
- * @param {function} listener
- * @return {object}
+ * @param {Number} size
+ * @param {String} str
+ * @param {Object} [options]
+ * @return {Array}
  * @public
  */
 
-function onFinished (msg, listener) {
-  if (isFinished(msg) !== false) {
-    defer(listener, null, msg)
-    return msg
+function rangeParser (size, str, options) {
+  if (typeof str !== 'string') {
+    throw new TypeError('argument str must be a string')
   }
 
-  // attach the listener to the message
-  attachListener(msg, wrap(listener))
+  var index = str.indexOf('=')
 
-  return msg
+  if (index === -1) {
+    return -2
+  }
+
+  // split the range string
+  var arr = str.slice(index + 1).split(',')
+  var ranges = []
+
+  // add ranges type
+  ranges.type = str.slice(0, index)
+
+  // parse all ranges
+  for (var i = 0; i < arr.length; i++) {
+    var range = arr[i].split('-')
+    var start = parseInt(range[0], 10)
+    var end = parseInt(range[1], 10)
+
+    // -nnn
+    if (isNaN(start)) {
+      start = size - end
+      end = size - 1
+    // nnn-
+    } else if (isNaN(end)) {
+      end = size - 1
+    }
+
+    // limit last-byte-pos to current length
+    if (end > size - 1) {
+      end = size - 1
+    }
+
+    // invalid or unsatisifiable
+    if (isNaN(start) || isNaN(end) || start > end || start < 0) {
+      continue
+    }
+
+    // add range
+    ranges.push({
+      start: start,
+      end: end
+    })
+  }
+
+  if (ranges.length < 1) {
+    // unsatisifiable
+    return -1
+  }
+
+  return options && options.combine
+    ? combineRanges(ranges)
+    : ranges
 }
 
 /**
- * Determine if message is already finished.
- *
- * @param {object} msg
- * @return {boolean}
- * @public
- */
-
-function isFinished (msg) {
-  var socket = msg.socket
-
-  if (typeof msg.finished === 'boolean') {
-    // OutgoingMessage
-    return Boolean(msg.finished || (socket && !socket.writable))
-  }
-
-  if (typeof msg.complete === 'boolean') {
-    // IncomingMessage
-    return Boolean(msg.upgrade || !socket || !socket.readable || (msg.complete && !msg.readable))
-  }
-
-  // don't know
-  return undefined
-}
-
-/**
- * Attach a finished listener to the message.
- *
- * @param {object} msg
- * @param {function} callback
+ * Combine overlapping & adjacent ranges.
  * @private
  */
 
-function attachFinishedListener (msg, callback) {
-  var eeMsg
-  var eeSocket
-  var finished = false
+function combineRanges (ranges) {
+  var ordered = ranges.map(mapWithIndex).sort(sortByRangeStart)
 
-  function onFinish (error) {
-    eeMsg.cancel()
-    eeSocket.cancel()
+  for (var j = 0, i = 1; i < ordered.length; i++) {
+    var range = ordered[i]
+    var current = ordered[j]
 
-    finished = true
-    callback(error)
-  }
-
-  // finished on first message event
-  eeMsg = eeSocket = first([[msg, 'end', 'finish']], onFinish)
-
-  function onSocket (socket) {
-    // remove listener
-    msg.removeListener('socket', onSocket)
-
-    if (finished) return
-    if (eeMsg !== eeSocket) return
-
-    // finished on first socket event
-    eeSocket = first([[socket, 'error', 'close']], onFinish)
-  }
-
-  if (msg.socket) {
-    // socket already assigned
-    onSocket(msg.socket)
-    return
-  }
-
-  // wait for socket to be assigned
-  msg.on('socket', onSocket)
-
-  if (msg.socket === undefined) {
-    // istanbul ignore next: node.js 0.8 patch
-    patchAssignSocket(msg, onSocket)
-  }
-}
-
-/**
- * Attach the listener to the message.
- *
- * @param {object} msg
- * @return {function}
- * @private
- */
-
-function attachListener (msg, listener) {
-  var attached = msg.__onFinished
-
-  // create a private single listener with queue
-  if (!attached || !attached.queue) {
-    attached = msg.__onFinished = createListener(msg)
-    attachFinishedListener(msg, attached)
-  }
-
-  attached.queue.push(listener)
-}
-
-/**
- * Create listener on message.
- *
- * @param {object} msg
- * @return {function}
- * @private
- */
-
-function createListener (msg) {
-  function listener (err) {
-    if (msg.__onFinished === listener) msg.__onFinished = null
-    if (!listener.queue) return
-
-    var queue = listener.queue
-    listener.queue = null
-
-    for (var i = 0; i < queue.length; i++) {
-      queue[i](err, msg)
+    if (range.start > current.end + 1) {
+      // next range
+      ordered[++j] = range
+    } else if (range.end > current.end) {
+      // extend range
+      current.end = range.end
+      current.index = Math.min(current.index, range.index)
     }
   }
 
-  listener.queue = []
+  // trim ordered array
+  ordered.length = j + 1
 
-  return listener
+  // generate combined range
+  var combined = ordered.sort(sortByRangeIndex).map(mapWithoutIndex)
+
+  // copy ranges type
+  combined.type = ranges.type
+
+  return combined
 }
 
 /**
- * Patch ServerResponse.prototype.assignSocket for node.js 0.8.
- *
- * @param {ServerResponse} res
- * @param {function} callback
+ * Map function to add index value to ranges.
  * @private
  */
 
-// istanbul ignore next: node.js 0.8 patch
-function patchAssignSocket (res, callback) {
-  var assignSocket = res.assignSocket
-
-  if (typeof assignSocket !== 'function') return
-
-  // res.on('socket', callback) is broken in 0.8
-  res.assignSocket = function _assignSocket (socket) {
-    assignSocket.call(this, socket)
-    callback(socket)
-  }
-}
-
-/**
- * Try to require async_hooks
- * @private
- */
-
-function tryRequireAsyncHooks () {
-  try {
-    return require('async_hooks')
-  } catch (e) {
-    return {}
+function mapWithIndex (range, index) {
+  return {
+    start: range.start,
+    end: range.end,
+    index: index
   }
 }
 
 /**
- * Wrap function with async resource, if possible.
- * AsyncResource.bind static method backported.
+ * Map function to remove index value from ranges.
  * @private
  */
 
-function wrap (fn) {
-  var res
-
-  // create anonymous resource
-  if (asyncHooks.AsyncResource) {
-    res = new asyncHooks.AsyncResource(fn.name || 'bound-anonymous-fn')
+function mapWithoutIndex (range) {
+  return {
+    start: range.start,
+    end: range.end
   }
+}
 
-  // incompatible node.js
-  if (!res || !res.runInAsyncScope) {
-    return fn
-  }
+/**
+ * Sort function to sort ranges by index.
+ * @private
+ */
 
-  // return bound function
-  return res.runInAsyncScope.bind(res, fn, null)
+function sortByRangeIndex (a, b) {
+  return a.index - b.index
+}
+
+/**
+ * Sort function to sort ranges by start position.
+ * @private
+ */
+
+function sortByRangeStart (a, b) {
+  return a.start - b.start
 }
