@@ -1,117 +1,94 @@
+type Intrinsic = typeof globalThis;
+
+type IntrinsicName = keyof Intrinsic | `%${keyof Intrinsic}%`;
+
+type IntrinsicPath = IntrinsicName | `${StripPercents<IntrinsicName>}.${string}` | `%${StripPercents<IntrinsicName>}.${string}%`;
+
+type AllowMissing = boolean;
+
+type StripPercents<T extends string> = T extends `%${infer U}%` ? U : T;
+
+type BindMethodPrecise<F> =
+  F extends (this: infer This, ...args: infer Args) => infer R
+  ? (obj: This, ...args: Args) => R
+  : F extends {
+    (this: infer This1, ...args: infer Args1): infer R1;
+    (this: infer This2, ...args: infer Args2): infer R2
+  }
+  ? {
+    (obj: This1, ...args: Args1): R1;
+    (obj: This2, ...args: Args2): R2
+  }
+  : never
+
+// Extract method type from a prototype
+type GetPrototypeMethod<T extends keyof typeof globalThis, M extends string> =
+  (typeof globalThis)[T] extends { prototype: any }
+  ? M extends keyof (typeof globalThis)[T]['prototype']
+  ? (typeof globalThis)[T]['prototype'][M]
+  : never
+  : never
+
+// Get static property/method
+type GetStaticMember<T extends keyof typeof globalThis, P extends string> =
+  P extends keyof (typeof globalThis)[T] ? (typeof globalThis)[T][P] : never
+
+// Type that maps string path to actual bound function or value with better precision
+type BoundIntrinsic<S extends string> =
+  S extends `${infer Obj}.prototype.${infer Method}`
+  ? Obj extends keyof typeof globalThis
+  ? BindMethodPrecise<GetPrototypeMethod<Obj, Method & string>>
+  : unknown
+  : S extends `${infer Obj}.${infer Prop}`
+  ? Obj extends keyof typeof globalThis
+  ? GetStaticMember<Obj, Prop & string>
+  : unknown
+  : unknown
+
+declare function arraySlice<T>(array: readonly T[], start?: number, end?: number): T[];
+declare function arraySlice<T>(array: ArrayLike<T>, start?: number, end?: number): T[];
+declare function arraySlice<T>(array: IArguments, start?: number, end?: number): T[];
+
+// Special cases for methods that need explicit typing
+interface SpecialCases {
+  '%Object.prototype.isPrototypeOf%': (thisArg: {}, obj: unknown) => boolean;
+  '%String.prototype.replace%': {
+    (str: string, searchValue: string | RegExp, replaceValue: string): string;
+    (str: string, searchValue: string | RegExp, replacer: (substring: string, ...args: any[]) => string): string
+  };
+  '%Object.prototype.toString%': (obj: {}) => string;
+  '%Object.prototype.hasOwnProperty%': (obj: {}, v: PropertyKey) => boolean;
+  '%Array.prototype.slice%': typeof arraySlice;
+  '%Array.prototype.map%': <T, U>(array: readonly T[], callbackfn: (value: T, index: number, array: readonly T[]) => U, thisArg?: any) => U[];
+  '%Array.prototype.filter%': <T>(array: readonly T[], predicate: (value: T, index: number, array: readonly T[]) => unknown, thisArg?: any) => T[];
+  '%Array.prototype.indexOf%': <T>(array: readonly T[], searchElement: T, fromIndex?: number) => number;
+  '%Function.prototype.apply%': <T, A extends any[], R>(fn: (...args: A) => R, thisArg: any, args: A) => R;
+  '%Function.prototype.call%': <T, A extends any[], R>(fn: (...args: A) => R, thisArg: any, ...args: A) => R;
+  '%Function.prototype.bind%': <T, A extends any[], R>(fn: (...args: A) => R, thisArg: any, ...args: A) => (...remainingArgs: A) => R;
+  '%Promise.prototype.then%': {
+    <T, R>(promise: Promise<T>, onfulfilled: (value: T) => R | PromiseLike<R>): Promise<R>;
+    <T, R>(promise: Promise<T>, onfulfilled: ((value: T) => R | PromiseLike<R>) | undefined | null, onrejected: (reason: any) => R | PromiseLike<R>): Promise<R>;
+  };
+  '%RegExp.prototype.test%': (regexp: RegExp, str: string) => boolean;
+  '%RegExp.prototype.exec%': (regexp: RegExp, str: string) => RegExpExecArray | null;
+  '%Error.prototype.toString%': (error: Error) => string;
+  '%TypeError.prototype.toString%': (error: TypeError) => string;
+  '%String.prototype.split%': (
+        obj: unknown,
+        splitter: string | RegExp | {
+            [Symbol.split](string: string, limit?: number): string[];
+        },
+        limit?: number | undefined
+    ) => string[];
+}
+
 /**
- * License for programmatically and manually incorporated
- * documentation aka. `JSDoc` from https://github.com/nodejs/node/tree/master/doc
+ * Returns a bound function for a prototype method, or a value for a static property.
  *
- * Copyright Node.js contributors. All rights reserved.
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to
- * deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
- * sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
- * IN THE SOFTWARE.
+ * @param name - The name of the intrinsic (e.g. 'Array.prototype.slice')
+ * @param {AllowMissing} [allowMissing] - Whether to allow missing intrinsics (default: false)
  */
+declare function callBound<K extends keyof SpecialCases | StripPercents<keyof SpecialCases>, S extends IntrinsicPath>(name: K, allowMissing?: AllowMissing): SpecialCases[`%${StripPercents<K>}%`];
+declare function callBound<K extends keyof SpecialCases | StripPercents<keyof SpecialCases>, S extends IntrinsicPath>(name: S, allowMissing?: AllowMissing): BoundIntrinsic<S>;
 
-// NOTE: These definitions support Node.js and TypeScript 5.7.
-
-// Reference required TypeScript libraries:
-/// <reference lib="es2020" />
-/// <reference lib="esnext.disposable" />
-
-// TypeScript library polyfills required for TypeScript 5.7:
-/// <reference path="./compatibility/float16array.d.ts" />
-
-// Iterator definitions required for compatibility with TypeScript <5.6:
-/// <reference path="../compatibility/iterators.d.ts" />
-
-// Definitions for Node.js modules specific to TypeScript 5.7+:
-/// <reference path="../globals.typedarray.d.ts" />
-/// <reference path="../buffer.buffer.d.ts" />
-
-// Definitions for Node.js modules that are not specific to any version of TypeScript:
-/// <reference path="../globals.d.ts" />
-/// <reference path="../web-globals/abortcontroller.d.ts" />
-/// <reference path="../web-globals/blob.d.ts" />
-/// <reference path="../web-globals/console.d.ts" />
-/// <reference path="../web-globals/crypto.d.ts" />
-/// <reference path="../web-globals/domexception.d.ts" />
-/// <reference path="../web-globals/encoding.d.ts" />
-/// <reference path="../web-globals/events.d.ts" />
-/// <reference path="../web-globals/fetch.d.ts" />
-/// <reference path="../web-globals/importmeta.d.ts" />
-/// <reference path="../web-globals/messaging.d.ts" />
-/// <reference path="../web-globals/navigator.d.ts" />
-/// <reference path="../web-globals/performance.d.ts" />
-/// <reference path="../web-globals/storage.d.ts" />
-/// <reference path="../web-globals/streams.d.ts" />
-/// <reference path="../web-globals/timers.d.ts" />
-/// <reference path="../web-globals/url.d.ts" />
-/// <reference path="../assert.d.ts" />
-/// <reference path="../assert/strict.d.ts" />
-/// <reference path="../async_hooks.d.ts" />
-/// <reference path="../buffer.d.ts" />
-/// <reference path="../child_process.d.ts" />
-/// <reference path="../cluster.d.ts" />
-/// <reference path="../console.d.ts" />
-/// <reference path="../constants.d.ts" />
-/// <reference path="../crypto.d.ts" />
-/// <reference path="../dgram.d.ts" />
-/// <reference path="../diagnostics_channel.d.ts" />
-/// <reference path="../dns.d.ts" />
-/// <reference path="../dns/promises.d.ts" />
-/// <reference path="../domain.d.ts" />
-/// <reference path="../events.d.ts" />
-/// <reference path="../fs.d.ts" />
-/// <reference path="../fs/promises.d.ts" />
-/// <reference path="../http.d.ts" />
-/// <reference path="../http2.d.ts" />
-/// <reference path="../https.d.ts" />
-/// <reference path="../inspector.d.ts" />
-/// <reference path="../inspector.generated.d.ts" />
-/// <reference path="../inspector/promises.d.ts" />
-/// <reference path="../module.d.ts" />
-/// <reference path="../net.d.ts" />
-/// <reference path="../os.d.ts" />
-/// <reference path="../path.d.ts" />
-/// <reference path="../path/posix.d.ts" />
-/// <reference path="../path/win32.d.ts" />
-/// <reference path="../perf_hooks.d.ts" />
-/// <reference path="../process.d.ts" />
-/// <reference path="../punycode.d.ts" />
-/// <reference path="../querystring.d.ts" />
-/// <reference path="../quic.d.ts" />
-/// <reference path="../readline.d.ts" />
-/// <reference path="../readline/promises.d.ts" />
-/// <reference path="../repl.d.ts" />
-/// <reference path="../sea.d.ts" />
-/// <reference path="../sqlite.d.ts" />
-/// <reference path="../stream.d.ts" />
-/// <reference path="../stream/consumers.d.ts" />
-/// <reference path="../stream/promises.d.ts" />
-/// <reference path="../stream/web.d.ts" />
-/// <reference path="../string_decoder.d.ts" />
-/// <reference path="../test.d.ts" />
-/// <reference path="../test/reporters.d.ts" />
-/// <reference path="../timers.d.ts" />
-/// <reference path="../timers/promises.d.ts" />
-/// <reference path="../tls.d.ts" />
-/// <reference path="../trace_events.d.ts" />
-/// <reference path="../tty.d.ts" />
-/// <reference path="../url.d.ts" />
-/// <reference path="../util.d.ts" />
-/// <reference path="../util/types.d.ts" />
-/// <reference path="../v8.d.ts" />
-/// <reference path="../vm.d.ts" />
-/// <reference path="../wasi.d.ts" />
-/// <reference path="../worker_threads.d.ts" />
-/// <reference path="../zlib.d.ts" />
+export = callBound;

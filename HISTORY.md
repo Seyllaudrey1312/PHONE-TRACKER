@@ -1,250 +1,397 @@
-2.0.0 / 2024-08-31
-==================
+2.1.35 / 2022-03-12
+===================
 
-  * Drop node <18 support
-  * deps: mime-types@^3.0.0
-  * deps: negotiator@^1.0.0
+  * deps: mime-db@1.52.0
+    - Add extensions from IANA for more `image/*` types
+    - Add extension `.asc` to `application/pgp-keys`
+    - Add extensions to various XML types
+    - Add new upstream MIME types
 
-1.3.8 / 2022-02-02
-==================
+2.1.34 / 2021-11-08
+===================
 
-  * deps: mime-types@~2.1.34
-    - deps: mime-db@~1.51.0
-  * deps: negotiator@0.6.3
+  * deps: mime-db@1.51.0
+    - Add new upstream MIME types
 
-1.3.7 / 2019-04-29
-==================
+2.1.33 / 2021-10-01
+===================
 
-  * deps: negotiator@0.6.2
-    - Fix sorting charset, encoding, and language with extra parameters
+  * deps: mime-db@1.50.0
+    - Add deprecated iWorks mime types and extensions
+    - Add new upstream MIME types
 
-1.3.6 / 2019-04-28
-==================
+2.1.32 / 2021-07-27
+===================
 
-  * deps: mime-types@~2.1.24
-    - deps: mime-db@~1.40.0
+  * deps: mime-db@1.49.0
+    - Add extension `.trig` to `application/trig`
+    - Add new upstream MIME types
 
-1.3.5 / 2018-02-28
-==================
+2.1.31 / 2021-06-01
+===================
 
-  * deps: mime-types@~2.1.18
-    - deps: mime-db@~1.33.0
+  * deps: mime-db@1.48.0
+    - Add extension `.mvt` to `application/vnd.mapbox-vector-tile`
+    - Add new upstream MIME types
 
-1.3.4 / 2017-08-22
-==================
+2.1.30 / 2021-04-02
+===================
 
-  * deps: mime-types@~2.1.16
-    - deps: mime-db@~1.29.0
+  * deps: mime-db@1.47.0
+    - Add extension `.amr` to `audio/amr`
+    - Remove ambigious extensions from IANA for `application/*+xml` types
+    - Update primary extension to `.es` for `application/ecmascript`
 
-1.3.3 / 2016-05-02
-==================
+2.1.29 / 2021-02-17
+===================
 
-  * deps: mime-types@~2.1.11
-    - deps: mime-db@~1.23.0
-  * deps: negotiator@0.6.1
-    - perf: improve `Accept` parsing speed
-    - perf: improve `Accept-Charset` parsing speed
-    - perf: improve `Accept-Encoding` parsing speed
-    - perf: improve `Accept-Language` parsing speed
+  * deps: mime-db@1.46.0
+    - Add extension `.amr` to `audio/amr`
+    - Add extension `.m4s` to `video/iso.segment`
+    - Add extension `.opus` to `audio/ogg`
+    - Add new upstream MIME types
 
-1.3.2 / 2016-03-08
-==================
+2.1.28 / 2021-01-01
+===================
 
-  * deps: mime-types@~2.1.10
+  * deps: mime-db@1.45.0
+    - Add `application/ubjson` with extension `.ubj`
+    - Add `image/avif` with extension `.avif`
+    - Add `image/ktx2` with extension `.ktx2`
+    - Add extension `.dbf` to `application/vnd.dbf`
+    - Add extension `.rar` to `application/vnd.rar`
+    - Add extension `.td` to `application/urc-targetdesc+xml`
+    - Add new upstream MIME types
+    - Fix extension of `application/vnd.apple.keynote` to be `.key`
+
+2.1.27 / 2020-04-23
+===================
+
+  * deps: mime-db@1.44.0
+    - Add charsets from IANA
+    - Add extension `.cjs` to `application/node`
+    - Add new upstream MIME types
+
+2.1.26 / 2020-01-05
+===================
+
+  * deps: mime-db@1.43.0
+    - Add `application/x-keepass2` with extension `.kdbx`
+    - Add extension `.mxmf` to `audio/mobile-xmf`
+    - Add extensions from IANA for `application/*+xml` types
+    - Add new upstream MIME types
+
+2.1.25 / 2019-11-12
+===================
+
+  * deps: mime-db@1.42.0
+    - Add new upstream MIME types
+    - Add `application/toml` with extension `.toml`
+    - Add `image/vnd.ms-dds` with extension `.dds`
+
+2.1.24 / 2019-04-20
+===================
+
+  * deps: mime-db@1.40.0
+    - Add extensions from IANA for `model/*` types
+    - Add `text/mdx` with extension `.mdx`
+
+2.1.23 / 2019-04-17
+===================
+
+  * deps: mime-db@~1.39.0
+    - Add extensions `.siv` and `.sieve` to `application/sieve`
+    - Add new upstream MIME types
+
+2.1.22 / 2019-02-14
+===================
+
+  * deps: mime-db@~1.38.0
+    - Add extension `.nq` to `application/n-quads`
+    - Add extension `.nt` to `application/n-triples`
+    - Add new upstream MIME types
+
+2.1.21 / 2018-10-19
+===================
+
+  * deps: mime-db@~1.37.0
+    - Add extensions to HEIC image types
+    - Add new upstream MIME types
+
+2.1.20 / 2018-08-26
+===================
+
+  * deps: mime-db@~1.36.0
+    - Add Apple file extensions from IANA
+    - Add extensions from IANA for `image/*` types
+    - Add new upstream MIME types
+
+2.1.19 / 2018-07-17
+===================
+
+  * deps: mime-db@~1.35.0
+    - Add extension `.csl` to `application/vnd.citationstyles.style+xml`
+    - Add extension `.es` to `application/ecmascript`
+    - Add extension `.owl` to `application/rdf+xml`
+    - Add new upstream MIME types
+    - Add UTF-8 as default charset for `text/turtle`
+
+2.1.18 / 2018-02-16
+===================
+
+  * deps: mime-db@~1.33.0
+    - Add `application/raml+yaml` with extension `.raml`
+    - Add `application/wasm` with extension `.wasm`
+    - Add `text/shex` with extension `.shex`
+    - Add extensions for JPEG-2000 images
+    - Add extensions from IANA for `message/*` types
+    - Add new upstream MIME types
+    - Update font MIME types
+    - Update `text/hjson` to registered `application/hjson`
+
+2.1.17 / 2017-09-01
+===================
+
+  * deps: mime-db@~1.30.0
+    - Add `application/vnd.ms-outlook`
+    - Add `application/x-arj`
+    - Add extension `.mjs` to `application/javascript`
+    - Add glTF types and extensions
+    - Add new upstream MIME types
+    - Add `text/x-org`
+    - Add VirtualBox MIME types
+    - Fix `source` records for `video/*` types that are IANA
+    - Update `font/opentype` to registered `font/otf`
+
+2.1.16 / 2017-07-24
+===================
+
+  * deps: mime-db@~1.29.0
+    - Add `application/fido.trusted-apps+json`
+    - Add extension `.wadl` to `application/vnd.sun.wadl+xml`
+    - Add extension `.gz` to `application/gzip`
+    - Add new upstream MIME types
+    - Update extensions `.md` and `.markdown` to be `text/markdown`
+
+2.1.15 / 2017-03-23
+===================
+
+  * deps: mime-db@~1.27.0
+    - Add new mime types
+    - Add `image/apng`
+
+2.1.14 / 2017-01-14
+===================
+
+  * deps: mime-db@~1.26.0
+    - Add new mime types
+
+2.1.13 / 2016-11-18
+===================
+
+  * deps: mime-db@~1.25.0
+    - Add new mime types
+
+2.1.12 / 2016-09-18
+===================
+
+  * deps: mime-db@~1.24.0
+    - Add new mime types
+    - Add `audio/mp3`
+
+2.1.11 / 2016-05-01
+===================
+
+  * deps: mime-db@~1.23.0
+    - Add new mime types
+
+2.1.10 / 2016-02-15
+===================
+
+  * deps: mime-db@~1.22.0
+    - Add new mime types
     - Fix extension of `application/dash+xml`
     - Update primary extension for `audio/mp4`
-    - deps: mime-db@~1.22.0
 
-1.3.1 / 2016-01-19
+2.1.9 / 2016-01-06
 ==================
 
-  * deps: mime-types@~2.1.9
-    - deps: mime-db@~1.21.0
+  * deps: mime-db@~1.21.0
+    - Add new mime types
 
-1.3.0 / 2015-09-29
+2.1.8 / 2015-11-30
 ==================
 
-  * deps: mime-types@~2.1.7
-    - deps: mime-db@~1.19.0
-  * deps: negotiator@0.6.0
-    - Fix including type extensions in parameters in `Accept` parsing
-    - Fix parsing `Accept` parameters with quoted equals
-    - Fix parsing `Accept` parameters with quoted semicolons
-    - Lazy-load modules from main entry point
-    - perf: delay type concatenation until needed
-    - perf: enable strict mode
-    - perf: hoist regular expressions
-    - perf: remove closures getting spec properties
-    - perf: remove a closure from media type parsing
-    - perf: remove property delete from media type parsing
+  * deps: mime-db@~1.20.0
+    - Add new mime types
 
-1.2.13 / 2015-09-06
+2.1.7 / 2015-09-20
+==================
+
+  * deps: mime-db@~1.19.0
+    - Add new mime types
+
+2.1.6 / 2015-09-03
+==================
+
+  * deps: mime-db@~1.18.0
+    - Add new mime types
+
+2.1.5 / 2015-08-20
+==================
+
+  * deps: mime-db@~1.17.0
+    - Add new mime types
+
+2.1.4 / 2015-07-30
+==================
+
+  * deps: mime-db@~1.16.0
+    - Add new mime types
+
+2.1.3 / 2015-07-13
+==================
+
+  * deps: mime-db@~1.15.0
+    - Add new mime types
+
+2.1.2 / 2015-06-25
+==================
+
+  * deps: mime-db@~1.14.0
+    - Add new mime types
+
+2.1.1 / 2015-06-08
+==================
+
+  * perf: fix deopt during mapping
+
+2.1.0 / 2015-06-07
+==================
+
+  * Fix incorrectly treating extension-less file name as extension
+    - i.e. `'path/to/json'` will no longer return `application/json`
+  * Fix `.charset(type)` to accept parameters
+  * Fix `.charset(type)` to match case-insensitive
+  * Improve generation of extension to MIME mapping
+  * Refactor internals for readability and no argument reassignment
+  * Prefer `application/*` MIME types from the same source
+  * Prefer any type over `application/octet-stream`
+  * deps: mime-db@~1.13.0
+    - Add nginx as a source
+    - Add new mime types
+
+2.0.14 / 2015-06-06
 ===================
 
-  * deps: mime-types@~2.1.6
-    - deps: mime-db@~1.18.0
+  * deps: mime-db@~1.12.0
+    - Add new mime types
 
-1.2.12 / 2015-07-30
+2.0.13 / 2015-05-31
 ===================
 
-  * deps: mime-types@~2.1.4
-    - deps: mime-db@~1.16.0
+  * deps: mime-db@~1.11.0
+    - Add new mime types
 
-1.2.11 / 2015-07-16
+2.0.12 / 2015-05-19
 ===================
 
-  * deps: mime-types@~2.1.3
-    - deps: mime-db@~1.15.0
+  * deps: mime-db@~1.10.0
+    - Add new mime types
 
-1.2.10 / 2015-07-01
+2.0.11 / 2015-05-05
 ===================
 
-  * deps: mime-types@~2.1.2
-    - deps: mime-db@~1.14.0
+  * deps: mime-db@~1.9.1
+    - Add new mime types
 
-1.2.9 / 2015-06-08
+2.0.10 / 2015-03-13
+===================
+
+  * deps: mime-db@~1.8.0
+    - Add new mime types
+
+2.0.9 / 2015-02-09
 ==================
 
-  * deps: mime-types@~2.1.1
-    - perf: fix deopt during mapping
+  * deps: mime-db@~1.7.0
+    - Add new mime types
+    - Community extensions ownership transferred from `node-mime`
 
-1.2.8 / 2015-06-07
+2.0.8 / 2015-01-29
 ==================
 
-  * deps: mime-types@~2.1.0
-    - deps: mime-db@~1.13.0
-  * perf: avoid argument reassignment & argument slice
-  * perf: avoid negotiator recursive construction
-  * perf: enable strict mode
-  * perf: remove unnecessary bitwise operator
+  * deps: mime-db@~1.6.0
+    - Add new mime types
 
-1.2.7 / 2015-05-10
+2.0.7 / 2014-12-30
 ==================
 
-  * deps: negotiator@0.5.3
-    - Fix media type parameter matching to be case-insensitive
+  * deps: mime-db@~1.5.0
+    - Add new mime types
+    - Fix various invalid MIME type entries
 
-1.2.6 / 2015-05-07
+2.0.6 / 2014-12-30
 ==================
 
-  * deps: mime-types@~2.0.11
-    - deps: mime-db@~1.9.1
-  * deps: negotiator@0.5.2
-    - Fix comparing media types with quoted values
-    - Fix splitting media types with quoted commas
+  * deps: mime-db@~1.4.0
+    - Add new mime types
+    - Fix various invalid MIME type entries
+    - Remove example template MIME types
 
-1.2.5 / 2015-03-13
+2.0.5 / 2014-12-29
 ==================
 
-  * deps: mime-types@~2.0.10
-    - deps: mime-db@~1.8.0
+  * deps: mime-db@~1.3.1
+    - Fix missing extensions
 
-1.2.4 / 2015-02-14
+2.0.4 / 2014-12-10
+==================
+
+  * deps: mime-db@~1.3.0
+    - Add new mime types
+
+2.0.3 / 2014-11-09
+==================
+
+  * deps: mime-db@~1.2.0
+    - Add new mime types
+
+2.0.2 / 2014-09-28
+==================
+
+  * deps: mime-db@~1.1.0
+    - Add new mime types
+    - Update charsets
+
+2.0.1 / 2014-09-07
 ==================
 
   * Support Node.js 0.6
-  * deps: mime-types@~2.0.9
-    - deps: mime-db@~1.7.0
-  * deps: negotiator@0.5.1
-    - Fix preference sorting to be stable for long acceptable lists
 
-1.2.3 / 2015-01-31
+2.0.0 / 2014-09-02
 ==================
 
-  * deps: mime-types@~2.0.8
-    - deps: mime-db@~1.6.0
+  * Use `mime-db`
+  * Remove `.define()`
 
-1.2.2 / 2014-12-30
+1.0.2 / 2014-08-04
 ==================
 
-  * deps: mime-types@~2.0.7
-    - deps: mime-db@~1.5.0
+  * Set charset=utf-8 for `text/javascript`
 
-1.2.1 / 2014-12-30
+1.0.1 / 2014-06-24
 ==================
 
-  * deps: mime-types@~2.0.5
-    - deps: mime-db@~1.3.1
+  * Add `text/jsx` type
 
-1.2.0 / 2014-12-19
+1.0.0 / 2014-05-12
 ==================
 
-  * deps: negotiator@0.5.0
-    - Fix list return order when large accepted list
-    - Fix missing identity encoding when q=0 exists
-    - Remove dynamic building of Negotiator class
+  * Return `false` for unknown types
+  * Set charset=utf-8 for `application/json`
 
-1.1.4 / 2014-12-10
+0.1.0 / 2014-05-02
 ==================
 
-  * deps: mime-types@~2.0.4
-    - deps: mime-db@~1.3.0
-
-1.1.3 / 2014-11-09
-==================
-
-  * deps: mime-types@~2.0.3
-    - deps: mime-db@~1.2.0
-
-1.1.2 / 2014-10-14
-==================
-
-  * deps: negotiator@0.4.9
-    - Fix error when media type has invalid parameter
-
-1.1.1 / 2014-09-28
-==================
-
-  * deps: mime-types@~2.0.2
-    - deps: mime-db@~1.1.0
-  * deps: negotiator@0.4.8
-    - Fix all negotiations to be case-insensitive
-    - Stable sort preferences of same quality according to client order
-
-1.1.0 / 2014-09-02
-==================
-
-  * update `mime-types`
-
-1.0.7 / 2014-07-04
-==================
-
-  * Fix wrong type returned from `type` when match after unknown extension
-
-1.0.6 / 2014-06-24
-==================
-
-  * deps: negotiator@0.4.7
-
-1.0.5 / 2014-06-20
-==================
-
- * fix crash when unknown extension given
-
-1.0.4 / 2014-06-19
-==================
-
-  * use `mime-types`
-
-1.0.3 / 2014-06-11
-==================
-
-  * deps: negotiator@0.4.6
-    - Order by specificity when quality is the same
-
-1.0.2 / 2014-05-29
-==================
-
-  * Fix interpretation when header not in request
-  * deps: pin negotiator@0.4.5
-
-1.0.1 / 2014-01-18
-==================
-
-  * Identity encoding isn't always acceptable
-  * deps: negotiator@~0.4.0
-
-1.0.0 / 2013-12-27
-==================
-
-  * Genesis
+  * Initial release
